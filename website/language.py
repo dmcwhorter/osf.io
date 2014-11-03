@@ -27,7 +27,7 @@ Registration successful. Please check {email} to confirm your email address.
 REGISTRATION_UNAVAILABLE = 'Registration currently unavailable.'
 
 ALREADY_REGISTERED = '''
-The email <em>{email}</em> has already been registered.
+The email {email} has already been registered.
 '''
 
 # Shown if user tries to login with an email that is not yet confirmed
