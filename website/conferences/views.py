@@ -16,7 +16,6 @@ from nameparser import HumanName
 from modularodm import Q
 from modularodm.exceptions import ModularOdmException
 
-from framework.forms.utils import sanitize
 from framework.exceptions import HTTPError
 from framework.auth import Auth
 
@@ -118,7 +117,7 @@ def add_poster_by_email(conf, recipient, address, fullname, subject,
         node.set_privacy('public', auth=auth)
 
     # Add body
-    node.update_node_wiki('home', sanitize(message), auth)
+    node.update_node_wiki('home', message, auth)
 
     # Add tags
     presentation_type = 'talk' if 'talk' in recipient else 'poster'
