@@ -18,7 +18,6 @@ from website.models import User
 from website.models import ApiKey
 from website.views import _render_nodes
 from website.util.sanitize import escape_html
-from website.util.sanitize import strip_html
 from website.profile import utils as profile_utils
 
 logger = logging.getLogger(__name__)
@@ -88,7 +87,9 @@ def _profile_view(profile, is_profile):
 def _get_user_created_badges(user):
     addon = user.get_addon('badges')
     if addon:
-        return [badge for badge in addon.badge__creator if not badge.is_system_badge]
+        return [badge for badge
+                in addon.badge__creator
+                if not badge.is_system_badge]
     return []
 
 
@@ -113,7 +114,7 @@ def edit_profile(**kwargs):
 
     response_data = {'response': 'success'}
     if form.get('name') == 'fullname' and form.get('value', '').strip():
-        user.fullname = strip_html(form['value'])
+        user.fullname = form['value']
         user.save()
         response_data['name'] = user.fullname
     return response_data
@@ -132,6 +133,7 @@ def user_profile(auth, **kwargs):
         'user_id': user._id,
         'user_api_url': user.api_url,
     }
+
 
 @must_be_logged_in
 def user_addons(auth, **kwargs):
@@ -157,9 +159,11 @@ def user_addons(auth, **kwargs):
     out['addons_available'] = [
         addon
         for addon in settings.ADDONS_AVAILABLE
-        if 'user' in addon.owners and addon.short_name not in settings.SYSTEM_ADDED_ADDONS['user']
+        if 'user' in addon.owners
+        and addon.short_name not in settings.SYSTEM_ADDED_ADDONS['user']
     ]
-    out['addons_available'].sort(key=operator.attrgetter("full_name"), reverse=False)
+    out['addons_available'].sort(key=operator.attrgetter("full_name"),
+                                 reverse=False)
     out['addons_enabled'] = addons_enabled
     out['addon_enabled_settings'] = addon_enabled_settings
     return out
@@ -383,7 +387,7 @@ def unserialize_social(auth, **kwargs):
     verify_user_match(auth, **kwargs)
 
     user = auth.user
-    json_data = escape_html(request.get_json())
+    json_data = request.get_json()
 
     user.social['personal'] = json_data.get('personal')
     user.social['orcid'] = json_data.get('orcid')
@@ -428,7 +432,7 @@ def unserialize_school(school):
 
 def unserialize_contents(field, func, auth):
     user = auth.user
-    json_data = escape_html(request.get_json())
+    json_data = request.get_json()
     setattr(
         user,
         field,
