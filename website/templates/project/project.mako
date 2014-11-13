@@ -205,7 +205,7 @@ ${parent.javascript_bottom()}
             interactive: ${'true' if user["can_edit"] else 'false'},
             maxChars: 128,
             onAddTag: function(tag){
-                var url = "${node['api_url']}" + "addtag/" + tag + "/";
+                var url = "${node['api_url']}" + "addtag/" + encodeURIComponent(tag) + "/";
                 var request = $.ajax({
                     url: url,
                     type: "POST",
