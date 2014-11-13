@@ -83,15 +83,15 @@
         });
 
         registrationViewModel = new MetaData.ViewModel(
-            ${schema},
+            ${schema | n},
             ${int(registered)},
-            ${[str(node['id'])] + [str(each) for each in children_ids]}
+            ${[str(node['id'])] + [str(each) for each in children_ids] | n,json}
         );
         ko.applyBindings(registrationViewModel, $('#registration_template')[0]);
         registrationViewModel.updateIdx('add', true);
 
         % if registered:
-            registrationViewModel.unserialize(${payload});
+            registrationViewModel.unserialize(${payload | n});
         % endif
 
         $('#registration_template form').on('submit', function() {

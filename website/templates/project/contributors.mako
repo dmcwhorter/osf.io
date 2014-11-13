@@ -238,9 +238,9 @@
         });
 
     $script(['/static/js/contribManager.js'], function() {
-        var contributors = ${json.dumps(contributors)};
-        var user = ${json.dumps(user)};
-        var isRegistration = ${json.dumps(node['is_registration'])};
+        var contributors = ${json.dumps(contributors) | n};
+        var user = ${json.dumps(user) | n};
+        var isRegistration = ${json.dumps(node['is_registration']) | n};
         var manager = new ContribManager('#manageContributors', contributors, user, isRegistration);
     });
 
