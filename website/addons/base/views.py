@@ -1,12 +1,17 @@
-"""
+# -*- coding: utf-8 -*-
 
-"""
+import httplib
 
-import httplib as http
+import itsdangerous
 from flask import request
 
+from framework.auth import Auth
+from framework.sessions import Session
 from framework.exceptions import HTTPError
 from framework.auth.decorators import must_be_logged_in
+
+from website import settings
+from website.models import User, Node
 from website.project import decorators
 
 
@@ -19,7 +24,7 @@ def disable_addon(**kwargs):
 
     addon_name = kwargs.get('addon')
     if addon_name is None:
-        raise HTTPError(http.BAD_REQUEST)
+        raise HTTPError(httplib.BAD_REQUEST)
 
     deleted = node.delete_addon(addon_name, auth)
 
@@ -33,11 +38,11 @@ def get_addon_user_config(**kwargs):
 
     addon_name = kwargs.get('addon')
     if addon_name is None:
-        raise HTTPError(http.BAD_REQUEST)
+        raise HTTPError(httplib.BAD_REQUEST)
 
     addon = user.get_addon(addon_name)
     if addon is None:
-        raise HTTPError(http.BAD_REQUEST)
+        raise HTTPError(httplib.BAD_REQUEST)
 
     return addon.to_json(user)
 
@@ -53,3 +58,45 @@ def check_file_guid(guid):
             pass
         return guid_url
     return None
+
+
+def get_user_from_cookie(cookie):
+    token = itsdangerous.Signer(settings.SECRET_KEY).unsign(cookie)
+    session = Session.load(token)
+    if session is None:
+        return None
+    return User.load(session.data['auth_user_id'])
+
+
+# TODO: Implement me
+def check_token(user, token):
+    pass
+
+
+def get_auth(**kwargs):
+    try:
+        cookie = request.args['cookie']
+        token = request.args['token']
+        node_id = request.args['node_id']
+        provider_name = request.args['provider']
+    except KeyError:
+        raise HTTPError(httplib.BAD_REQUEST)
+
+    user = get_user_from_cookie(cookie)
+    if user is None:
+        raise HTTPError(httplib.BAD_REQUEST)
+
+    check_token(user, token)
+
+    node = Node.load(node_id)
+    if not node:
+        raise HTTPError(httplib.NOT_FOUND)
+
+    if not node.can_view(Auth(user)):
+        raise HTTPError(httplib.BAD_REQUEST)
+
+    provider_settings = node.get_addon(provider_name)
+    if not provider_settings:
+        raise HTTPError(httplib.BAD_REQUEST)
+
+    return provider_settings.serialize_credentials()

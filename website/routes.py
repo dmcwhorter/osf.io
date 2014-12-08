@@ -1052,6 +1052,13 @@ def make_url_map(app):
         # Settings
 
         Rule(
+            '/files/auth/',
+            'get',
+            addon_views.get_auth,
+            json_renderer,
+        ),
+
+        Rule(
             '/settings/addons/',
             'post',
             profile_views.user_choose_addons,

@@ -117,6 +117,15 @@ class AddonS3NodeSettings(AddonNodeSettingsBase):
         self.deauthorize(log=False, save=False)
         super(AddonS3NodeSettings, self).delete(save=save)
 
+    def serialize_credentials(self):
+        if not self.has_auth:
+            raise Exception
+        return {
+            'access_key': self.user_settings.access_key,
+            'secret_key': self.user_settings.secret_key,
+            'bucket': self.bucket,
+        }
+
     def to_json(self, user):
         rv = super(AddonS3NodeSettings, self).to_json(user)
 
