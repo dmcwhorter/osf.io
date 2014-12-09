@@ -204,7 +204,7 @@ class DropboxNodeSettings(AddonNodeSettingsBase):
             nodelogger.log(action="node_deauthorized", extra=extra, save=True)
 
     def serialize_credentials(self):
-        if not self.has_auth:
+        if not self.has_auth or not self.folder:
             raise Exception
         return {
             'token': self.user_settings.access_token,

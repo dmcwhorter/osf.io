@@ -5,7 +5,7 @@ import httplib
 import itsdangerous
 from flask import request
 
-from framework.auth import Auth
+# from framework.auth import Auth
 from framework.sessions import Session
 from framework.exceptions import HTTPError
 from framework.auth.decorators import must_be_logged_in
@@ -73,8 +73,19 @@ def check_token(user, token):
     pass
 
 
+permission_map = {
+    'metadata': 'read',
+    'download': 'read',
+    'upload': 'write',
+    'delete': 'write',
+    'copy': 'write',
+    'move': 'write',
+}
+
+
 def get_auth(**kwargs):
     try:
+        action = request.args['action']
         cookie = request.args['cookie']
         token = request.args['token']
         node_id = request.args['node_id']
@@ -83,8 +94,15 @@ def get_auth(**kwargs):
         raise HTTPError(httplib.BAD_REQUEST)
 
     user = get_user_from_cookie(cookie)
-    if user is None:
-        raise HTTPError(httplib.BAD_REQUEST)
+
+    if user is not None:
+        auth = {
+            'id': user._id,
+            'email': '{}@osf.io'.format(user._id),
+            'name': user.fullname,
+        }
+    else:
+        auth = {}
 
     check_token(user, token)
 
@@ -92,11 +110,22 @@ def get_auth(**kwargs):
     if not node:
         raise HTTPError(httplib.NOT_FOUND)
 
-    if not node.can_view(Auth(user)):
+    # TODO: Handle view-only links
+    try:
+        permission_required = permission_map[action]
+    except KeyError:
+        raise HTTPError(httplib.BAD_REQUEST)
+
+    if not node.has_permission(user, permission_required):
         raise HTTPError(httplib.BAD_REQUEST)
 
     provider_settings = node.get_addon(provider_name)
     if not provider_settings:
         raise HTTPError(httplib.BAD_REQUEST)
 
-    return provider_settings.serialize_credentials()
+    identity = provider_settings.serialize_credentials()
+
+    return {
+        'auth': auth,
+        'identity': identity,
+    }
