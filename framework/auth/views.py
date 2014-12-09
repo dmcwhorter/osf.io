@@ -89,7 +89,7 @@ def forgot_password():
             )
 
     forms.push_errors_to_status(form.errors)
-    return framework.auth_login(forgot_password_form=form)
+    return auth_login(forgot_password_form=form)
 
 
 ###############################################################################

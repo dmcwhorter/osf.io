@@ -1,14 +1,30 @@
+<script type="application/javascript">
+    function capitaliseFirstLetter(string)
+        {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+</script>
 <div id="alert-container">
 % for message, css_class, dismissible, safe in status:
-    <div class='alert alert-block alert-${css_class} fade in'>
         % if dismissible:
-            <a class='close' data-dismiss='alert' href='#'>&times;</a>
-        % endif
-        % if safe:
-            <p>${ message | n }</p>
+                <script type="application/javascript">
+                    var title = capitaliseFirstLetter('${css_class | trim}')+':';
+                    % if safe:
+                        var message = '${message | n,trim }';
+                    %else:
+                        var message = '${message | trim}';
+                    % endif
+                    var type = '${css_class | trim}';
+                    $.osf.growl(title, message, type);
+                </script>
         % else:
-            <p>${ message }</p>
+            <div class='alert alert-block alert-${css_class} fade in'>
+            % if safe:
+                <p>${ message | n }</p>
+            % else:
+                <p>${ message }</p>
+            % endif
+            </div>
         % endif
-    </div>
 % endfor
 </div>
