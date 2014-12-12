@@ -20,3 +20,16 @@ WEBHOOK_HMAC_SECRET = 'changeme'
 WEBHOOK_HMAC_DIGEST = hashlib.sha1
 
 REVISIONS_PAGE_SIZE = 10
+
+# IDENTITY = {
+#     'provider': 's3',
+#     'access_key': '',
+#     'secret_key': ''
+# }
+
+IDENTITY = {
+    'provider': 'cloudfiles',
+    'username': '',
+    'api_key': '',
+    'region': ''
+}

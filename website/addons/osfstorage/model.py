@@ -112,6 +112,11 @@ class OsfStorageNodeSettings(AddonNodeSettingsBase):
         self.copy_contents_to(clone)
         return clone, message
 
+    # TODO Rename this
+    def serialize_credentials(self, path, **kwargs):
+        # TODO Verification here
+        return settings.IDENTITY
+
 
 class BaseFileObject(StoredObject):
 
