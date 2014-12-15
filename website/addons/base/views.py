@@ -123,7 +123,7 @@ def get_auth(**kwargs):
     if not provider_settings:
         raise HTTPError(httplib.BAD_REQUEST)
 
-    identity = provider_settings.serialize_credentials()
+    identity = provider_settings.serialize_credentials(request.args)
 
     return {
         'auth': auth,
