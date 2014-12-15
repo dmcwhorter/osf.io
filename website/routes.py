@@ -50,9 +50,7 @@ def get_globals():
         'dev_mode': settings.DEV_MODE,
         'allow_login': settings.ALLOW_LOGIN,
         'status': status.pop_status_messages(),
-        'js_all': assets_env['js'].urls(),
         'css_all': assets_env['css'].urls(),
-        'js_bottom': assets_env['js_bottom'].urls(),
         'domain': settings.DOMAIN,
         'disk_saving_mode': settings.DISK_SAVING_MODE,
         'language': language,
@@ -219,14 +217,7 @@ def make_url_map(app):
     ], prefix='/api/v1')
 
     process_rules(app, [
-        # API route for getting summary information for dashboard nodes.
         Rule('/dashboard/get_nodes/', 'get', website_views.get_dashboard_nodes, json_renderer),
-        # API route for getting serialized HGrid data, e.g. for the project
-        # organizer
-        # TODO: Perhaps this should be namespaced to so that the above route
-        # can use the /dashboard/ URL. e.g.
-        # /dashboard/<nid> -> Return info about dashboard nodes
-        # /dashboard/grid/<nid>/ -> Return hgrid-serialized data for dashboard nodes
         Rule(
             [
                 '/dashboard/<nid>',
