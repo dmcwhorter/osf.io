@@ -62,7 +62,7 @@ function buildWaterButlerUrl(item, metadata) {
         token: '',
         nid: nodeId,
         provider: item.data.addon,
-        cookie: document.cookie.match(/osf=(.*);/)[1]
+        cookie: document.cookie.match(/osf=(.*)(;|$)/)[1]
     });
 }
 
