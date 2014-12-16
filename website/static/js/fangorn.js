@@ -56,7 +56,7 @@ function _fangornResolveIcon(item){
 }
 
 function buildWaterButlerUrl(item, metadata) {
-    baseUrl = 'http://localhost:7777/' + (metadata ? 'data?': 'files?');
+    baseUrl = 'http://localhost:7777/' + (metadata ? 'data?': 'file?');
     return baseUrl + $.param({
         path: item.data.path,
         token: '',
@@ -262,6 +262,8 @@ function _fangornLazyLoadError (item) {
 function _fangornActionColumn (item, col){
     var self = this;
     var buttons = [];
+
+    item.data.addon = item.data.addon || item.parent().data.addon;
     item.data.permissions = item.data.permissions || item.parent().data.permissions;
 
     // Upload button if this is a folder
@@ -463,7 +465,8 @@ tbOptions = {
             clickable : '#treeGrid',
             addRemoveLinks: false,
             previewTemplate: '<div></div>',
-            parallelUploads: 1
+            parallelUploads: 1,
+            method: 'PUT'
 
         },
         resolveIcon : _fangornResolveIcon,
@@ -471,7 +474,7 @@ tbOptions = {
         resolveUploadUrl : _fangornResolveUploadUrl,
         resolveLazyloadUrl : _fangornResolveLazyLoad,
         lazyLoadError : _fangornLazyLoadError,
-        resolveUploadMethod : 'POST',
+        resolveUploadMethod : 'PUT',
         dropzoneEvents : {
             uploadprogress : _fangornUploadProgress,
             sending : _fangornSending,
