@@ -88,7 +88,7 @@ def get_auth(**kwargs):
         action = request.args['action']
         cookie = request.args['cookie']
         token = request.args['token']
-        node_id = request.args['node_id']
+        node_id = request.args['nid']
         provider_name = request.args['provider']
     except KeyError:
         raise HTTPError(httplib.BAD_REQUEST)

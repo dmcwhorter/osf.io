@@ -117,7 +117,7 @@ class AddonS3NodeSettings(AddonNodeSettingsBase):
         self.deauthorize(log=False, save=False)
         super(AddonS3NodeSettings, self).delete(save=save)
 
-    def serialize_credentials(self):
+    def serialize_credentials(self, *args):
         if not self.has_auth:
             raise Exception
         return {

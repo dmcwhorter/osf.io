@@ -14,17 +14,30 @@ var sliderSelector = '#footerSlideIn';
 var SlideInViewModel = function (){
     var self = this;
     self.elem = $(sliderSelector);
-    if (this.elem.length > 0 && $.cookie('slide') !== '0') {
+
+    var dismissed = false;
+
+    try {
+        dismissed = dismissed || window.localStorage.getItem('slide') === '0';
+    } catch (e) {}
+
+    dismissed = dismissed || $.cookie('slide') === '0';
+
+    if (this.elem.length > 0 && !dismissed) {
         setTimeout(function () {
             self.elem.slideDown(1000);
         }, 3000);
     }
     self.dismiss = function() {
         self.elem.slideUp(1000);
-        $.cookie('slide', '0', { expires: 1});
+        try {
+            window.localStorage.setItem('slide', '0');
+        } catch (e) {
+            $.cookie('slide', '0', { expires: 1, path: '/'});
+        }
     };
 };
-var NO_FOOTER_PATHS = ['/login/', '/getting-started/'];
+var NO_FOOTER_PATHS = ['/login/', '/getting-started/', '/register/'];
 if ($(sliderSelector).length > 0 &&
         $.inArray(window.location.pathname, NO_FOOTER_PATHS) === -1) {
     $osf.applyBindings(new SlideInViewModel(), sliderSelector);
