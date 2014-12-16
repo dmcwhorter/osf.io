@@ -258,11 +258,15 @@ class AddonGitHubNodeSettings(AddonNodeSettingsBase):
             })
         return rv
 
-    def serialize_credentials(self):
+    def serialize_waterbutler_credentials(self):
         if not self.complete or not self.repo:
             raise Exception()
+        return {'token': self.user_settings.oauth_access_token}
+
+    def serialize_waterbutler_settings(self):
+        if not self.complete:
+            raise Exception
         return {
-            'token': self.user_settings.oauth_access_token,
             'owner': self.user,
             'repo': self.repo,
         }

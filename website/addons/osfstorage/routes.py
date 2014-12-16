@@ -99,63 +99,21 @@ api_routes = {
 
         Rule(
             [
-                '/project/<pid>/osfstorage/files/',
-                '/project/<pid>/node/<nid>/osfstorage/files/',
-                '/project/<pid>/osfstorage/files/<path:path>/',
-                '/project/<pid>/node/<nid>/osfstorage/files/<path:path>/',
+                '/project/<pid>/osfstorage/hooks/crud/<path:path>',
+                '/project/<pid>/node/<nid>/osfstorage/hooks/crud/<path:path>',
+            ],
+            'put',
+            views.osf_storage_crud_hook_put,
+            json_renderer,
+        ),
+
+        Rule(
+            [
+                '/project/<pid>/osfstorage/hooks/crud/<path:path>',
+                '/project/<pid>/node/<nid>/osfstorage/hooks/crud/<path:path>',
             ],
             'post',
-            views.osf_storage_request_upload_url,
-            json_renderer,
-        ),
-
-        Rule(
-            [
-                '/project/<pid>/osfstorage/hooks/start/<path:path>',
-                '/project/<pid>/node/<nid>/osfstorage/hooks/start/<path:path>',
-            ],
-            'put',
-            views.osf_storage_upload_start_hook,
-            json_renderer,
-        ),
-
-        Rule(
-            [
-                '/project/<pid>/osfstorage/hooks/ping/<path:path>',
-                '/project/<pid>/node/<nid>/osfstorage/hooks/ping/<path:path>',
-            ],
-            'post',
-            views.osf_storage_upload_ping_hook,
-            json_renderer,
-        ),
-
-        Rule(
-            [
-                '/project/<pid>/osfstorage/hooks/cached/<path:path>',
-                '/project/<pid>/node/<nid>/osfstorage/hooks/cached/<path:path>',
-            ],
-            'put',
-            views.osf_storage_upload_cached_hook,
-            json_renderer,
-        ),
-
-        Rule(
-            [
-                '/project/<pid>/osfstorage/hooks/archived/<path:path>',
-                '/project/<pid>/node/<nid>/osfstorage/hooks/archived/<path:path>',
-            ],
-            'put',
-            views.osf_storage_upload_archived_hook,
-            json_renderer,
-        ),
-
-        Rule(
-            [
-                '/project/<pid>/osfstorage/hooks/finish/<path:path>',
-                '/project/<pid>/node/<nid>/osfstorage/hooks/finish/<path:path>',
-            ],
-            'put',
-            views.osf_storage_upload_finish_hook,
+            views.osf_storage_crud_hook_post,
             json_renderer,
         ),
 

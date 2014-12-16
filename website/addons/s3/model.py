@@ -117,14 +117,18 @@ class AddonS3NodeSettings(AddonNodeSettingsBase):
         self.deauthorize(log=False, save=False)
         super(AddonS3NodeSettings, self).delete(save=save)
 
-    def serialize_credentials(self, *args):
+    def serialize_waterbutler_credentials(self):
         if not self.has_auth:
             raise Exception
         return {
             'access_key': self.user_settings.access_key,
             'secret_key': self.user_settings.secret_key,
-            'bucket': self.bucket,
         }
+
+    def serialize_waterbutler_settings(self):
+        if not self.bucket:
+            raise Exception
+        return {'bucket': self.bucket}
 
     def to_json(self, user):
         rv = super(AddonS3NodeSettings, self).to_json(user)

@@ -4,17 +4,18 @@
 import os
 import httplib
 import logging
-import urlparse
 import itertools
 
 import furl
 import requests
 import markupsafe
 import simplejson
+import itsdangerous
 
 from modularodm import Q
 from cloudstorm import sign
 
+from framework.sessions import session
 from framework.exceptions import HTTPError
 
 from website.util import rubeus
@@ -218,35 +219,6 @@ def build_callback_urls(node, path):
     }
 
 
-def get_upload_url(node, user, size, content_type, file_path):
-    """Request signed upload URL from upload service.
-
-    :param Node node: Root node
-    :param User user: User uploading file
-    :param int size: Expected file size
-    :param str content_type: Expected file content type
-    :param str file_path: Expected file path
-    """
-    payload = {
-        'size': size,
-        'type': content_type,
-        'path': file_path,
-        'extra': {'user': user._id},
-    }
-    urls = build_callback_urls(node, file_path)
-    payload.update(urls)
-    data = make_signed_request(
-        'post',
-        urlparse.urljoin(
-            choose_upload_url(),
-            'urls/upload/',
-        ),
-        signer=url_signer,
-        payload=payload,
-    )
-    return data['url']
-
-
 def get_filename(version_idx, file_version, file_record):
     """Build name for downloaded file, appending version date if not latest.
 
@@ -264,26 +236,16 @@ def get_filename(version_idx, file_version, file_record):
     )
 
 
-def get_download_url(version_idx, file_version, file_record):
-    """Request signed download URL from upload service.
-
-    :param FileVersion file_version: Version to fetch
-    :param FileRecord file_record: Root file object
-    """
-    payload = {
-        'location': file_version.location,
-        'filename': get_filename(version_idx, file_version, file_record),
-    }
-    data = make_signed_request(
-        'POST',
-        urlparse.urljoin(
-            choose_upload_url(),
-            'urls/download/',
-        ),
-        signer=url_signer,
-        payload=payload,
-    )
-    return data['url']
+def get_download_url(record, version):
+    url = furl.furl(settings.WATERBUTLER_URL)
+    url.args.update({
+        'provider': 'osfstorage',
+        'nid': record.node._id,
+        'cookie': itsdangerous.Signer(settings.SECRET_KEY).sign(session._id),
+        'token': None,
+        'path': record.path,
+    })
+    return url.url
 
 
 def get_cache_filename(file_version):

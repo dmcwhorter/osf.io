@@ -123,9 +123,11 @@ def get_auth(**kwargs):
     if not provider_settings:
         raise HTTPError(httplib.BAD_REQUEST)
 
-    identity = provider_settings.serialize_credentials(request.args)
+    credentials = provider_settings.serialize_waterbutler_credentials()
+    settings = provider_settings.serialize_waterbutler_settings()
 
     return {
         'auth': auth,
-        'identity': identity,
+        'credentials': credentials,
+        'settings': settings,
     }
