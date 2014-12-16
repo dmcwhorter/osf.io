@@ -99,8 +99,18 @@ api_routes = {
 
         Rule(
             [
-                '/project/<pid>/osfstorage/hooks/crud/<path:path>',
-                '/project/<pid>/node/<nid>/osfstorage/hooks/crud/<path:path>',
+                '/project/<pid>/osfstorage/hooks/crud/',
+                '/project/<pid>/node/<nid>/osfstorage/hooks/crud/',
+            ],
+            'get',
+            views.osf_storage_crud_hook_get,
+            json_renderer,
+        ),
+
+        Rule(
+            [
+                '/project/<pid>/osfstorage/hooks/crud/',
+                '/project/<pid>/node/<nid>/osfstorage/hooks/crud/',
             ],
             'put',
             views.osf_storage_crud_hook_put,
@@ -109,8 +119,8 @@ api_routes = {
 
         Rule(
             [
-                '/project/<pid>/osfstorage/hooks/crud/<path:path>',
-                '/project/<pid>/node/<nid>/osfstorage/hooks/crud/<path:path>',
+                '/project/<pid>/osfstorage/hooks/crud/',
+                '/project/<pid>/node/<nid>/osfstorage/hooks/crud/',
             ],
             'post',
             views.osf_storage_crud_hook_post,

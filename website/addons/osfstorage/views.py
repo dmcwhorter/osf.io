@@ -39,37 +39,75 @@ def make_error(code, message_short=None, message_long=None):
     return HTTPError(code, data=data)
 
 
-def get_record_or_404(path, node_addon, touch=True):
-    record = model.OsfStorageFileRecord.find_by_path(path, node_addon, touch=touch)
+def get_record_or_404(path, node_addon):
+    record = model.OsfStorageFileRecord.find_by_path(path, node_addon)
     if record is not None:
         return record
     raise HTTPError(httplib.NOT_FOUND)
 
 
-def osf_storage_crud_prepare(path, node_addon):
-    record = model.OsfStorageFileRecord.find_by_path(path, node_addon)
-    if record is None:
-        raise HTTPError(httplib.NOT_FOUND)
+@must_have_addon('osfstorage', 'node')
+def osf_storage_crud_hook_get(node_addon, **kwargs):
+    # TODO: Check HMAC signature
     try:
-        auth = request.json['auth']
-        location = request.json['location']
-        metadata = request.json['metadata']
+        path = request.args['path']
     except KeyError:
         raise HTTPError(httplib.BAD_REQUEST)
-    user = User.load(auth.get('uid'))
+    version_idx = request.args.get('version')
+    _, version, record = get_version(path, node_addon, version_idx)
+    return {
+        'data': {
+            'path': version.location_hash,
+        },
+        'settings': {
+            'container': version.location['container'],
+        },
+    }
+
+
+def osf_storage_metadata(path, node_addon, **kwargs):
+    pass
+
+
+def osf_storage_crud_prepare(node_addon):
+    # TODO: Verify HMAC signature
+    try:
+        auth = request.json['auth']
+        settings = request.json['settings']
+        metadata = request.json['metadata']
+        hashes = request.json['hashes']
+        worker = request.json['worker']
+        path = request.json['path'].strip('/')
+    except KeyError:
+        raise HTTPError(httplib.BAD_REQUEST)
+    user = User.load(auth.get('id'))
     if user is None:
         raise HTTPError(httplib.BAD_REQUEST)
-    return user, record, location, metadata
+    location = settings
+    location.update({
+        'object': metadata['name'],
+        'service': metadata['provider'],
+    })
+    # TODO: Migrate existing worker host and URL
+    location.update(worker)
+    metadata.update(hashes)
+    return path, user, location, metadata
 
 
-def osf_storage_crud_hook_post(path, node_addon, **kwargs):
-    user, record, location, metadata = osf_storage_crud_prepare(path, node_addon)
+@must_have_addon('osfstorage', 'node')
+def osf_storage_crud_hook_post(node_addon, **kwargs):
+    path, user, location, metadata = osf_storage_crud_prepare(node_addon)
+    record = model.OsfStorageFileRecord.get_or_create(path, node_addon)
     record.create_version(user, location, metadata)
     return {'status': 'success'}
 
 
-def osf_storage_crud_hook_put(path, node_addon, **kwargs):
-    user, record, location, metadata = osf_storage_crud_prepare(path, node_addon)
+@must_have_addon('osfstorage', 'node')
+def osf_storage_crud_hook_put(node_addon, **kwargs):
+    path, user, location, metadata = osf_storage_crud_prepare(node_addon)
+    record = model.OsfStorageFileRecord.find_by_path(path, node_addon)
+    if record is None:
+        raise HTTPError(httplib.NOT_FOUND)
     record.update_version_metadata(user, location, metadata)
     return {'status': 'success'}
 
@@ -216,19 +254,18 @@ def osf_storage_delete_file(auth, path, node_addon, **kwargs):
     return {'status': 'success'}
 
 
-@must_be_contributor_or_public
 @must_have_addon('osfstorage', 'node')
-def osf_storage_hgrid_contents(auth, node_addon, **kwargs):
-    path = kwargs.get('path', '')
+def osf_storage_hgrid_contents(node_addon, **kwargs):
+    # TODO: HMAC
+    path = request.args.get('path', '')
     file_tree = model.OsfStorageFileTree.find_by_path(path, node_addon)
     if file_tree is None:
         if path == '':
             return []
         raise HTTPError(httplib.NOT_FOUND)
     node = node_addon.owner
-    permissions = utils.get_permissions(auth, node)
     return [
-        utils.serialize_metadata_hgrid(item, node, permissions)
+        utils.serialize_metadata_hgrid(item, node)
         for item in list(file_tree.children)
         if item.touch() and not item.is_deleted
     ]

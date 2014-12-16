@@ -55,14 +55,18 @@ function _fangornResolveIcon(item){
     return m('i.icon-file-alt');
 }
 
-function buildWaterButlerUrl(item, metadata) {
-    baseUrl = 'http://localhost:7777/' + (metadata ? 'data?': 'file?');
+function buildWaterButlerUrl(item, metadata, file) {
+    var baseUrl = 'http://localhost:7777/' + (metadata ? 'data?': 'file?');
+    var path = item.data.path || '';
+    if (file) {
+        path += '/' + file.name;
+    }
     return baseUrl + $.param({
-        path: item.data.path,
+        path: path,
         token: '',
         nid: nodeId,
         provider: item.data.addon,
-        cookie: document.cookie.match(/osf=(.*)(;|$)/)[1]
+        cookie: document.cookie.match(/osf=(.*?)(;|$)/)[1]
     });
 }
 
@@ -89,8 +93,8 @@ function _fangornToggleCheck (item) {
     return false;
 }
 
-function _fangornResolveUploadUrl (item) {
-    return buildWaterButlerUrl(item, false);
+function _fangornResolveUploadUrl (item, file) {
+    return buildWaterButlerUrl(item, false, file);
 }
 
 function _fangornMouseOverRow (item, event) {
@@ -123,6 +127,12 @@ function _fangornSending (treebeard, file, xhr, formData) {
         data : { permissions : parent.data.permissions }
     };
     var newItem = treebeard.createItem(blankItem, parentID);
+
+    var _send = xhr.send;
+    xhr.send = function() {
+        _send.call(xhr, file);
+    };
+
     return null;
 }
 

@@ -27,9 +27,13 @@ REVISIONS_PAGE_SIZE = 10
 #     'secret_key': ''
 # }
 
-IDENTITY = {
+WATERBUTLER_CREDENTIALS = {
+    'username': 'changeme',
+    'token': 'changeme',
+    'region': 'changeme'
+}
+
+WATERBUTLER_SETTINGS = {
     'provider': 'cloudfiles',
-    'username': '',
-    'api_key': '',
-    'region': ''
+    'container': 'changeme',
 }
