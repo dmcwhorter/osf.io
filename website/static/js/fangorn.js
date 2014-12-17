@@ -218,7 +218,7 @@ function _downloadEvent (event, item, col) {
     window.location = buildWaterButlerUrl(item, false);
 }
 
-function _removeEvent (event, item, col) {
+function _removeEvent(event, item, col) {
     try {
         event.stopPropagation();
     }
@@ -231,7 +231,7 @@ function _removeEvent (event, item, col) {
     if(item.data.permissions.edit){
         // delete from server, if successful delete from view
         $.ajax({
-            url: item.data.urls.delete,
+            url: buildWaterButlerUrl(item, false),
             type : 'DELETE'
         })
         .done(function(data) {
