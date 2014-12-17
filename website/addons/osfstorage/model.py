@@ -110,15 +110,21 @@ class OsfStorageNodeSettings(AddonNodeSettingsBase):
         return clone, message
 
     def serialize_waterbutler_settings(self):
-        return {
-            'callback': self.node.api_url_for(
-                'osf_storage_crud_callback',
+        ret = {
+            'callback': self.owner.api_url_for(
+                'osf_storage_crud_hook_get',
+                _absolute=True,
+            ),
+            'metadata': self.owner.api_url_for(
+                'osf_storage_hgrid_contents',
                 _absolute=True,
             ),
         }
+        ret.update(settings.WATERBUTLER_SETTINGS)
+        return ret
 
     def serialize_waterbutler_credentials(self):
-        return settings.IDENTITY
+        return settings.WATERBUTLER_CREDENTIALS
 
 
 class BaseFileObject(StoredObject):
@@ -335,9 +341,10 @@ class OsfStorageFileRecord(BaseFileObject):
 
 identity = lambda value: value
 metadata_fields = {
+    # TODO: Add missing fields to WaterButler metadata
     'size': identity,
-    'content_type': identity,
-    'date_modified': parse_date,
+    # 'content_type': identity,
+    # 'date_modified': parse_date,
 }
 
 
@@ -373,6 +380,7 @@ class OsfStorageFileVersion(StoredObject):
 
     @property
     def location_hash(self):
+        # TODO: Throw error if object not present
         return self.location['object'] if self.location else None
 
     def is_duplicate(self, other):
@@ -400,12 +408,12 @@ def validate_version_location(schema, instance):
             raise modm_errors.ValidationValueError
 
 
-@OsfStorageFileVersion.subscribe('before_save')
-def validate_version_dates(schema, instance):
-    if not instance.date_resolved:
-        raise modm_errors.ValidationValueError
-    if instance.date_created > instance.date_resolved:
-        raise modm_errors.ValidationValueError
+# @OsfStorageFileVersion.subscribe('before_save')
+# def validate_version_dates(schema, instance):
+#     if not instance.date_resolved:
+#         raise modm_errors.ValidationValueError
+#     if instance.date_created > instance.date_resolved:
+#         raise modm_errors.ValidationValueError
 
 
 class OsfStorageGuidFile(GuidFile):
