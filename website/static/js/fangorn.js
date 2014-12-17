@@ -61,7 +61,7 @@ function buildWaterButlerUrl(item, metadata) {
         path: item.data.path,
         token: '',
         nid: nodeId,
-        provider: item.data.addon,
+        provider: item.data.addon || item.data.provider,
         cookie: document.cookie.match(/osf=(.*)(;|$)/)[1]
     });
 }
@@ -118,7 +118,7 @@ function _fangornSending (treebeard, file, xhr, formData) {
     var blankItem = {
         name : file.name,
         kind : 'item',
-        addon : parent.data.addon,
+        addon : parent.data.addon || parent.data.provider,
         children : [],
         data : { permissions : parent.data.permissions }
     };
