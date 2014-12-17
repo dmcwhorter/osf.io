@@ -271,7 +271,7 @@ class OsfStorageFileRecord(BaseFileObject):
         version = OsfStorageFileVersion(creator=creator, location=location)
         latest_version = self.get_version()
         if latest_version and latest_version.is_duplicate(version):
-            return
+            return latest_version
         version.save()
         if metadata:
             version.update_metadata(metadata)
@@ -342,7 +342,7 @@ class OsfStorageFileRecord(BaseFileObject):
 identity = lambda value: value
 metadata_fields = {
     # TODO: Add missing fields to WaterButler metadata
-    'size': identity,
+    # 'size': identity,
     # 'content_type': identity,
     # 'date_modified': parse_date,
 }

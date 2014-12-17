@@ -65,10 +65,6 @@ def osf_storage_crud_hook_get(node_addon, **kwargs):
     }
 
 
-def osf_storage_metadata(path, node_addon, **kwargs):
-    pass
-
-
 def osf_storage_crud_prepare(node_addon):
     # TODO: Verify HMAC signature
     try:
@@ -98,17 +94,24 @@ def osf_storage_crud_prepare(node_addon):
 def osf_storage_crud_hook_post(node_addon, **kwargs):
     path, user, location, metadata = osf_storage_crud_prepare(node_addon)
     record = model.OsfStorageFileRecord.get_or_create(path, node_addon)
-    record.create_version(user, location, metadata)
-    return {'status': 'success'}
+    version = record.create_version(user, location, metadata)
+    return {
+        'status': 'success',
+        'version_id': version._id,
+    }
 
 
 @must_have_addon('osfstorage', 'node')
 def osf_storage_crud_hook_put(node_addon, **kwargs):
-    path, user, location, metadata = osf_storage_crud_prepare(node_addon)
-    record = model.OsfStorageFileRecord.find_by_path(path, node_addon)
-    if record is None:
-        raise HTTPError(httplib.NOT_FOUND)
-    record.update_version_metadata(user, location, metadata)
+    try:
+        version_id = request.json['version_id']
+        metadata = request.json['metadata']
+    except KeyError:
+        raise HTTPError(httplib.BAD_REQUEST)
+    version = model.OsfStorageFileVersion.load(version_id)
+    if version is None:
+        raise HTTPError(httplib.BAD_REQUEST)
+    version.update_metadata(metadata)
     return {'status': 'success'}
 
 
