@@ -56,16 +56,18 @@ function _fangornResolveIcon(item){
 }
 
 function buildWaterButlerUrl(item, metadata, file) {
+    var path = item.data.path || '/';
     var baseUrl = 'http://localhost:7777/' + (metadata ? 'data?': 'file?');
-    var path = item.data.path || '';
+
     if (file) {
-        path += '/' + file.name;
+        path += file.name;
     }
+
     return baseUrl + $.param({
         path: path,
         token: '',
         nid: nodeId,
-        provider: item.data.addon || item.data.provider,
+        provider: item.data.provider,
         cookie: document.cookie.match(/osf=(.*?)(;|$)/)[1]
     });
 }
@@ -121,8 +123,8 @@ function _fangornSending (treebeard, file, xhr, formData) {
     // create a blank item that will refill when upload is finished.
     var blankItem = {
         name : file.name,
-        kind : 'item',
-        addon : parent.data.addon || parent.data.provider,
+        kind : 'file',
+        provider : parent.data.provider,
         children : [],
         data : { permissions : parent.data.permissions }
     };
@@ -210,7 +212,7 @@ function _downloadEvent (event, item, col) {
         window.event.cancelBubble = true;
     }
     window.console.log('Download Event triggered', this, event, item, col);
-    if(item.data.addon === 'osfstorage'){
+    if(item.data.provider === 'osfstorage'){
         item.data.downloads++;
     }
     window.location = buildWaterButlerUrl(item, false);
@@ -245,9 +247,7 @@ function _removeEvent (event, item, col) {
 }
 
 function _fangornResolveLazyLoad(tree, item){
-    item.data.addon = item.data.addon || item.parent().data.addon;
-
-    if (item.data.addon === undefined) {
+    if (item.data.provider === undefined) {
         return false;
     }
     return buildWaterButlerUrl(item, true);
@@ -273,11 +273,10 @@ function _fangornActionColumn (item, col){
     var self = this;
     var buttons = [];
 
-    item.data.addon = item.data.addon || item.parent().data.addon;
     item.data.permissions = item.data.permissions || item.parent().data.permissions;
 
     // Upload button if this is a folder
-    if (item.kind === 'folder' && item.data.addon && item.data.permissions.edit) {
+    if (item.kind === 'folder' && item.data.provider && item.data.permissions.edit) {
         buttons.push({
             'name' : '',
             'icon' : 'icon-upload-alt',
@@ -343,7 +342,7 @@ function _fangornResolveRows(item){
         custom : _fangornActionColumn
     });
 
-    if(item.data.addon === 'osfstorage'){
+    if(item.data.provider === 'osfstorage'){
         default_columns.push({
             data : 'downloads',
             sortInclude : false,
@@ -433,20 +432,20 @@ tbOptions = {
         },
         addcheck : function (treebeard, item, file) {
             //window.console.log('Add check', this, treebeard, item, file);
-            if(item.data.addon && item.kind === 'folder') {
+            if(item.data.provider && item.kind === 'folder') {
                 if (item.data.permissions.edit){
                     if(!_fangornFileExists.call(treebeard, item, file)){
                         if(item.data.accept && item.data.accept.maxSize){
                             var size = Math.round(file.size/10000)/100;
                             var maxSize = item.data.accept.maxSize;
-                            if(maxSize >= size && size !== 0){
+                            if(maxSize >= size && file.size !== 0){
                                 return true;
                             }
                             if(maxSize < size )  {
                                 var msgText = 'One of the files is too large (' + size + ' MB). Max file size is ' + item.data.accept.maxSize + ' MB.' ;
                                 item.notify.update(msgText, 'warning', undefined, 3000);
                             }
-                            if(size === 0)  {
+                            if(size === 0 && file.size === 0)  {
                                 var msgText = 'Some files were ignored because they were empty.' ;
                                 item.notify.update(msgText, 'warning', undefined, 3000);
                             }
