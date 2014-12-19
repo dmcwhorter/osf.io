@@ -124,6 +124,8 @@ def auth_login(auth,
                     twofactor_code
                 )
                 return response
+            except exceptions.LoginDisabledError:
+                status.push_status_message(language.DISABLED, 'error')
             except exceptions.LoginNotAllowedError:
                 status.push_status_message(
                     message=language.UNCONFIRMED,
@@ -181,9 +183,10 @@ def confirm_email_get(**kwargs):
     user = User.load(kwargs['uid'])
     token = kwargs['token']
     if user:
-        if user.confirm_email(token):  # Confirm and register the usre
+        if user.confirm_email(token):  # Confirm and register the user
             user.date_last_login = datetime.datetime.utcnow()
             user.save()
+
             # Go to settings page
             status.push_status_message(
                 message=language.WELCOME_MESSAGE,
@@ -191,6 +194,7 @@ def confirm_email_get(**kwargs):
                 safe=True,
             )
             response = redirect('/settings/')
+
             return framework.auth.authenticate(user, response=response)
     # Return data for the error template
     return {
