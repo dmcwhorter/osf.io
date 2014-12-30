@@ -93,6 +93,7 @@ def serialize_settings(node_settings, current_user, client=None):
         user_settings.owner._primary_key == current_user._primary_key
     )
     current_user_settings = current_user.get_addon('dropbox')
+    node = node_settings.owner
     valid_credentials = True
 
     if user_settings:
@@ -111,6 +112,11 @@ def serialize_settings(node_settings, current_user, client=None):
         'userHasAuth': current_user_settings is not None and current_user_settings.has_auth,
         'validCredentials': valid_credentials,
         'urls': serialize_urls(node_settings),
+        'node': {
+            'id': node._id,
+            'urls': {'api': node.api_url_for('view_project'), 'web': node.web_url_for('view_project')},
+            'isRegistration': node.is_registration,
+        }
     }
 
     if node_settings.has_auth:

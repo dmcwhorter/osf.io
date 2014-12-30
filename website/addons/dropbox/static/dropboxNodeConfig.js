@@ -28,6 +28,8 @@
         self.selector = selector;
         // Auth information
         self.nodeHasAuth = ko.observable(false);
+        // Whether the node is a registration
+        self.nodeIsRegistration = ko.observable(false);
         // whether current user is authorizer of the addon
         self.userIsOwner = ko.observable(false);
         // whether current user has an auth token
@@ -83,6 +85,7 @@
             // Make sure folder has name and path properties defined
             self.folder(data.folder || {name: null, path: null});
             self.urls(data.urls);
+            self.nodeIsRegistration(data.node.isRegistration);
         };
 
         self.fetchFromServer = function() {

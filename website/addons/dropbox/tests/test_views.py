@@ -153,6 +153,12 @@ class TestConfigViews(DropboxAddonTestCase):
         assert_false(result['userIsOwner'])
         assert_false(result['userHasAuth'])
 
+    def test_serialize_settings_returns_correct_node_info(self):
+        result = serialize_settings(self.node_settings, self.user, client=mock_client)
+        ndata = result['node']
+        assert_equal(ndata['id'], self.node_settings.owner._id)
+        assert_equal(ndata['isRegistration'], self.node_settings.owner.is_registration)
+
     @mock.patch('website.addons.dropbox.client.DropboxClient.account_info')
     def test_serialize_settings_valid_credentials(self, mock_account_info):
         mock_account_info.return_value = {'display_name': 'Mr. Drop Box'}
