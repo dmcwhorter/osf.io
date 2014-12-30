@@ -137,12 +137,10 @@
                     % endif
 
                 </form>
-
-
                 </div>
             </div>
 
-            % if addon_enabled_settings:
+            % if addon_enabled_settings and not node['is_registration']:
 
                 <div id="configureAddons" class="panel panel-default">
 
