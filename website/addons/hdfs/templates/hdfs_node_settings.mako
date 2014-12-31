@@ -4,83 +4,61 @@
     <div>
         <h4 class="addon-title">
             Hadoop HDFS
-
-            <small class="authorized-by">
-                % if node_has_auth:
-                    authorized by
-                    <a href="${owner_url}" target="_blank">
-                        ${owner}
-                    </a>
-                    % if not is_registration:
-                        <a id="hdfsRemoveToken" class="text-danger pull-right addon-auth">Deauthorize</a>
-                    % endif
-                % elif user_has_auth:
-                    <a id="hdfsImportToken" class="text-primary pull-right addon-auth">Import Credentials</a>
-                % endif
-            </small>
-
         </h4>
     </div>
 
-    % if bucket_list is not None:
+
+    % if not user_has_auth:
 
         <div class="form-group">
-
-            <p> <strong>Current Bucket:</strong></p>
-
-            <div class="row">
-
-                <div class="col-md-6">
-
-                    <select class="form-control" id="hdfs_bucket" name="hdfs_bucket"
-                        ${'' if user_has_auth and user_is_owner and not is_registration else 'disabled'}>
-                        <option value="">-----</option>
-                        % for bucket_name in bucket_list or []:
-                            <option value="${bucket_name}" ${'selected' if bucket_name == bucket else ''}>
-                                ${bucket_name}
-                            </option>
-                        % endfor
-                    </select>
-
-                </div>
-
-                % if user_has_auth and user_is_owner and not is_registration:
-                    <div class="col-md-6">
-                        <a class="btn btn-default" id="newBucket">Create Bucket</a>
-
-                        <button class="btn btn-primary addon-settings-submit pull-right">
-                            Submit
-                        </button>
-                    </div>
-                % endif
-
-            </div>
-
-        </div> <!-- End form group -->
-
-    % elif node_has_auth and bucket_list is None:
-
-        <div>
-            <span class="text-danger">
-                Error loading Hdfs access keys. Please refresh the page.
-            </span>
-        </div>
-
-    % elif not node_has_auth and not user_has_auth:
-
-        <div class="form-group">
-            <label for="hdfsAddon">Access Key</label>
-            <input class="form-control" id="access_key" name="access_key"/>
+            <label for="hdfsAddon">Name Node Host</label>
+            <input class="form-control" id="host" name="host"/>
         </div>
         <div class="form-group">
-            <label for="hdfsAddon">Secret Key</label>
-            <input type="password" class="form-control" id="secret_key" name="secret_key"/>
+            <label for="hdfsAddon">Name Node Port</label>
+            <input class="form-control" id="port" name="port"/>
+        </div>
+        <div class="form-group">
+            <label for="hdfsAddon">Hadoop RPC Protocol Version</label>
+            <input class="form-control" id="protocol_version" name="protocol_version"/>
+        </div>
+        <div class="form-group">
+            <label for="hdfsAddon">Use Trash?</label>
+            <input class="form-control" id="use_trash" name="use_trash"/>
+        </div>
+        <div class="form-group">
+            <label for="hdfsAddon">HDFS Username</label>
+            <input class="form-control" id="effective_user" name="effective_user"/>
+        </div>
+        <div class="form-group">
+            <label for="hdfsAddon">Base Path</label>
+            <input class="form-control" id="base_path" name="base_path"/>
         </div>
 
         <button class="btn btn-success addon-settings-submit">
             Submit
         </button>
+
     % endif
+
+
+    % if not node_has_auth:
+
+        <div class="form-group">
+            <label for="hdfsAddon">Node Path</label>
+            <input class="form-control" id="node_path" name="node_path"/>
+        </div>
+
+    % elif node_has_auth and node_path is None:
+
+        <div>
+            <span class="text-danger">
+                Error loading HDFS node path. Please refresh the page.
+            </span>
+        </div>
+
+    %endif
+
 
     ${self.on_submit()}
 

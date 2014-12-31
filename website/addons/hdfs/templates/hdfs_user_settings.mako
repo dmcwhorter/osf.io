@@ -18,12 +18,28 @@
 
     % if not has_auth:
         <div class="form-group">
-            <label for="hdfsAddon">Access Key</label>
-            <input class="form-control" id="access_key" name="access_key" ${'disabled' if disabled else ''} />
+            <label for="hdfsAddon">Name Node Host</label>
+            <input class="form-control" id="host" name="host" ${'disabled' if disabled else ''} />
         </div>
         <div class="form-group">
-            <label for="hdfsAddon">Secret Key</label>
-            <input type="password" class="form-control" id="secret_key" name="secret_key" ${'disabled' if disabled else ''} />
+            <label for="hdfsAddon">Name Node Port</label>
+            <input class="form-control" id="port" name="port" ${'disabled' if disabled else ''} />
+        </div>
+        <div class="form-group">
+            <label for="hdfsAddon">Hadoop RPC Protocol Version</label>
+            <input class="form-control" id="protocol_version" name="protocol_version" ${'disabled' if disabled else ''} />
+        </div>
+        <div class="form-group">
+            <label for="hdfsAddon">Use Trash?</label>
+            <input class="form-control" id="use_trash" name="use_trash" ${'disabled' if disabled else ''} />
+        </div>
+        <div class="form-group">
+            <label for="hdfsAddon">HDFS Username</label>
+            <input class="form-control" id="effective_user" name="effective_user" ${'disabled' if disabled else ''} />
+        </div>
+        <div class="form-group">
+            <label for="hdfsAddon">Base Path</label>
+            <input class="form-control" id="base_path" name="base_path" ${'disabled' if disabled else ''} />
         </div>
 
         <button class="btn btn-success addon-settings-submit">

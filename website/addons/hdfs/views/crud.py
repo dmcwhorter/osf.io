@@ -134,7 +134,7 @@ def hdfs_view(**kwargs):
 
 @must_be_contributor_or_public
 @must_have_addon('hdfs', 'node')
-def ping_render(**kwargs):
+def hdfs_ping_render(**kwargs):
     node_settings = kwargs['node_addon']
     path = kwargs.get('path')
     etag = request.args.get('etag')
@@ -182,7 +182,7 @@ def hdfs_upload(**kwargs):
 
 @must_be_contributor_or_public  # returns user, project
 @must_have_addon('hdfs', 'node')
-def file_delete_info(**kwargs):
+def hdfs_file_delete_info(**kwargs):
     node = kwargs['node'] or kwargs['project']
     api_url = node.api_url
     files_page_url = node.web_url_for('collect_file_trees')

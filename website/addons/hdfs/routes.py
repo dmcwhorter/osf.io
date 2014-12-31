@@ -84,7 +84,7 @@ api_routes = {
                 '/project/<pid>/node/<nid>/hdfs/<path:path>/render/',
             ],
             'get',
-            views.crud.ping_render,
+            views.crud.hdfs_ping_render,
             json_renderer
         ),
         Rule(
@@ -113,7 +113,7 @@ api_routes = {
                 '/project/<pid>/node/<nid>/hdfs/<path:path>/info/',
             ],
             'get',
-            views.crud.file_delete_info,
+            views.crud.hdfs_file_delete_info,
             json_renderer
         ),
     ],

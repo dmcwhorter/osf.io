@@ -151,7 +151,7 @@ def s3_view(**kwargs):
 
 @must_be_contributor_or_public
 @must_have_addon('s3', 'node')
-def ping_render(**kwargs):
+def s3_ping_render(**kwargs):
     node_settings = kwargs['node_addon']
     path = kwargs.get('path')
     etag = request.args.get('etag')

@@ -5,6 +5,8 @@ from dateutil.parser import parse
 from snakebite.client import Client
 
 from collections import namedtuple
+from snakebite.errors import RequestError, FileNotFoundException
+from website.addons.hdfs.utils import HdfsAddonException
 
 
 HdfsParameters = namedtuple('HdfsParameters', 'host port protocol_version use_trash effective_user')
@@ -20,16 +22,27 @@ def connection_from_params(parameters):
 
 
 def has_access(parameters, path):
-    return does_path_exist(parameters, path)
+    try:
+        exists = does_path_exist(parameters, path)
+    except FileNotFoundException:
+        exists = False
+
+    if not exists:
+        exists = create_directory(parameters, path)
+
+    return exists
 
 
 def create_directory(parameters, path):
-    return list(connection_from_params(parameters).mkdir(path, True))
+    return bool(iter(connection_from_params(parameters).mkdir([path], True)).next()['result'])
 
 
 def does_path_exist(parameters, path):
     c = connection_from_params(parameters)
-    return len(list(c.ls([path], include_toplevel=True, include_children=False))) > 0
+    try:
+        return len(list(c.ls([path], include_toplevel=True, include_children=False))) > 0
+    except RequestError as re:  # TODO: this is not the right exception to catch, figure out the right one
+        raise HdfsAddonException(re)
 
 
 class HdfsWrapper(object):
@@ -39,19 +52,18 @@ class HdfsWrapper(object):
         if hdfs is None or hdfs.user_settings is None:
             return None
         if not hdfs.is_registration:
-            return cls(connection_from_params(HdfsParameters(hdfs.user_settings.host,
-                                                             hdfs.user_settings.port,
-                                                             hdfs.user_settings.protocol_version,
-                                                             hdfs.user_settings.use_trash,
-                                                             hdfs.user_settings.effective_user)),
+            return cls(HdfsParameters(hdfs.user_settings.host,
+                                      hdfs.user_settings.port,
+                                      hdfs.user_settings.protocol_version,
+                                      hdfs.user_settings.use_trash,
+                                      hdfs.user_settings.effective_user),
                        hdfs.user_settings.base_path)
         else:
             return RegistrationWrapper(hdfs)
 
-    "Hdfs Bucket management"
-
-    def __init__(self, connection, base_path):
-        self.connection = connection
+    def __init__(self, params, base_path):
+        self.params = params
+        self.connection = connection_from_params(params)
         if not base_path.endswith('/'):
             base_path = base_path.append("/")
         self.base_path = base_path
@@ -108,18 +120,21 @@ class RegistrationWrapper(HdfsWrapper):
 
     def __init__(self, node_settings):
         if node_settings.user_settings:
-            connection = connection_from_params(HdfsParameters(
+            params = HdfsParameters(
                 node_settings.user_settings.host,
                 node_settings.user_settings.port,
                 node_settings.user_settings.protocol_version,
                 node_settings.user_settings.use_trash,
                 node_settings.user_settings.effective_user
-            ))
+            )
         else:
-            connection = connection_from_params(HdfsParameters())  # TODO: this is unlikely to work, handle better
+            params = HdfsParameters()  # TODO: this is unlikely to work, handle better
+        connection = connection_from_params(params)
         base_path = node_settings.user_settings.base_path
         super(RegistrationWrapper, self).__init__(connection, base_path)
+        self.node_path = node_settings.node_path
         self.registration_data = node_settings.registration_data
+        self.base_path = os.path.join(self.base_path, self.node_path)
 
 
 class HdfsObject(object):

@@ -95,7 +95,7 @@ api_routes = {
                 '/project/<pid>/node/<nid>/s3/<path:path>/render/',
             ],
             'get',
-            views.crud.ping_render,
+            views.crud.s3_ping_render,
             json_renderer,
         ),
         Rule(

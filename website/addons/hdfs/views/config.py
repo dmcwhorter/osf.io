@@ -6,6 +6,7 @@ from flask import request
 
 from framework.exceptions import HTTPError
 from framework.auth.decorators import must_be_logged_in
+from website.addons.hdfs.utils import HdfsAddonException
 
 from website.project.decorators import must_have_permission
 from website.project.decorators import must_not_be_registration
@@ -32,9 +33,9 @@ def add_hdfs_auth(parameters, base_path, user_settings):
 
 def params_from_request(req):
     host = req.json.get('host')
-    port = req.json.get('port')
-    protocol_version = req.json.get('protocol_version')
-    use_trash = req.json.get('use_trash')
+    port = int(req.json.get('port'))
+    protocol_version = int(req.json.get('protocol_version'))
+    use_trash = bool(req.json.get('use_trash'))
     effective_user = req.json.get('effective_user')
 
     if not host or not port or not protocol_version or not use_trash or not effective_user:
@@ -50,8 +51,11 @@ def hdfs_authorize_user(user_addon, **kwargs):
     params = params_from_request(request)
     base_path = request.json.get('base_path')
 
-    if not add_hdfs_auth(params, base_path, user_addon):
-        return {'message': 'Incorrect credentials'}, http.BAD_REQUEST
+    try:
+        if not add_hdfs_auth(params, base_path, user_addon):
+            return {'message': 'Incorrect credentials'}, http.BAD_REQUEST
+    except HdfsAddonException as he:
+        return {'message': "Error verifying HDFS connection %s" % he.message}, http.BAD_REQUEST
 
     return {}
 

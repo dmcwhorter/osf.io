@@ -1,20 +1,7 @@
-import re
-import sha
-import hmac
-import time
-import base64
-import urllib
 import hashlib
 
-from bson import ObjectId
-
-from dateutil.parser import parse
-
-from snakebite.client import Client
-
+import re
 from website.util import rubeus
-
-import settings as hdfs_settings
 
 
 def _key_type_to_rubeus(key_type):
@@ -22,6 +9,7 @@ def _key_type_to_rubeus(key_type):
         return rubeus.FOLDER
     else:
         return rubeus.FILE
+
 
 def serialize_obj(hdfs_wrapper):
     return [
@@ -32,6 +20,8 @@ def serialize_obj(hdfs_wrapper):
             }
         for x in hdfs_wrapper.get_wrapped_objects()
     ]
+
+
 def build_urls(node, file_name, url=None, etag=None, vid=None):
     file_name = file_name.rstrip('/')
 
@@ -60,3 +50,11 @@ def get_cache_file_name(key_name, etag):
 def validate_base_path(name):
     validate_name = re.compile('\([^\0 !$`&*()+]\|\\\( |!|\$|`|&|\*|\(|\)|\+\)\)\+')
     return bool(validate_name.match(name))
+
+
+class HdfsAddonException(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
